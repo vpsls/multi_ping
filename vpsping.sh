@@ -98,6 +98,8 @@ addresses+=("smarthost|FLORIDA (CENTRAL)|185.227.69.185")
 addresses+=("smarthost|NEW MEXICO|185.101.23.2")
 
 main_pid=$$
+# 创建一个空数组来存储子进程pid
+sub_pids=()
 tmp_dir=$(mktemp -d)
 if [ ! -d "$tmp_dir" ]; then
   echo "Failed to create temporary directory."
@@ -107,7 +109,7 @@ fi
 declare -a results
 
 cleanup() {
-    echo "Cleaning up..."
+    #echo "Cleaning up..."
     # 删除所有子进程
     pkill -P $$
     # 删除临时目录
@@ -184,6 +186,7 @@ ping_test() {
         echo "$address |$avg_delay |$avg_packet_loss" > "$tmp_dir/${address}_ping_test_temp_.result"
         #echo "$address finish" > "$tmp_dir/${address}_ping_test_temp_.result"
       ) &
+      sub_pids+=($!)
       ((completed_addresses++))
       progress=$((completed_addresses * 100 / total_addresses))
       show_progress $progress
@@ -195,7 +198,13 @@ ping_test() {
   echo "ping 启动完成, 等待结果统计 ..."
 
   while true; do
-    num_children=$(pgrep -P $main_pid | wc -l)
+    #num_children=$(pgrep -P $main_pid | xargs ps -o comm= -p | grep -v sleep | wc -l)
+    num_children=0
+    for pid in "${sub_pids[@]}"; do
+        if kill -0 $pid 2>/dev/null; then
+            num_children=$((num_children + 1))
+        fi
+    done
     num_finish=$((total_addresses-num_children))
     progress=$((num_finish * 100 / total_addresses))
     show_progress $progress
@@ -210,7 +219,6 @@ ping_test() {
   for address in "${addresses[@]}"; do
       result=$(cat "$tmp_dir/${address}_ping_test_temp_.result" | head -n 1)
       results+=("$result")
-      num_children=$(pgrep -P $main_pid | wc -l)
   done
   rm -rf  "$tmp_dir"
 }
