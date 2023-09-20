@@ -163,7 +163,8 @@ show_progress() {
 
 # 测试IP地址的延迟和丢包率
 ping_test() {
-  echo "启动 ping ..."
+  _green "源码地址: https://github.com/vpsls/multi_ping\n"
+  _green "启动 ping ...\n"
 
   # 每个ip的测试次数
   ip_test_count=$1
@@ -211,7 +212,7 @@ ping_test() {
 
   #printf "\r\033[Kping启动完成, 等待结果统计..."
   echo
-  echo "ping 启动完成, 等待结果统计 ..."
+  _green "ping 启动完成, 等待结果统计 ...\n"
 
   while true; do
     #num_children=$(pgrep -P $main_pid | xargs ps -o comm= -p | grep -v sleep | wc -l)
