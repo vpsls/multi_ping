@@ -103,6 +103,22 @@ addresses+=("v.ps|San Jose, United States|104.245.12.12")
 addresses+=("v.ps|Tokyo, Japan|103.201.131.131")
 addresses+=("v.ps|Sydney, Australia|103.136.146.146")
 
+allargs=$@
+# 仅运行指定的厂商
+declare -a check_addresses
+for address in "${addresses[@]}"; do
+  if [ -n "$allargs" ]; then
+    for arg in $allargs; do
+      if [[ "$address" == *"$arg"* ]]; then
+        check_addresses+=("$address")
+        break
+      fi
+    done
+  else
+    check_addresses+=("$address")
+  fi
+done
+
 main_pid=$$
 # 创建一个空数组来存储子进程pid
 sub_pids=()
@@ -161,10 +177,10 @@ ping_test() {
   # 每次ping的测试次数
   ping_test_count=$2
 
-  total_addresses=${#addresses[@]}
+  total_addresses=${#check_addresses[@]}
   completed_addresses=0
 
-  for address in "${addresses[@]}"; do
+  for address in "${check_addresses[@]}"; do
       touch "$tmp_dir/${address}_ping_test_temp_.result"
       (
         ip_addr=`echo $address | awk -F "|" '{print $3}'`
@@ -223,7 +239,7 @@ ping_test() {
 
   echo
   # 从临时文件读数据
-  for address in "${addresses[@]}"; do
+  for address in "${check_addresses[@]}"; do
       result=$(cat "$tmp_dir/${address}_ping_test_temp_.result" | head -n 1)
       results+=("$result")
   done
