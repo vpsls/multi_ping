@@ -158,19 +158,19 @@ _blue() {
 }
 
 show_progress() {
-    local progress=$1
-    local bar_length=100
-    local completed_length=$((progress * bar_length / 100))
-    local remaining_length=$((bar_length - completed_length))
-    local bar=$(printf "%${completed_length}s" | tr ' ' '#')
-    local space=$(printf "%${remaining_length}s" | tr ' ' ' ')
-    printf "\r[%s%s] %d%%" "$bar" "$space" "$progress"
+  local progress=$1
+  local bar_length=100
+  local completed_length=$((progress * bar_length / 100))
+  local remaining_length=$((bar_length - completed_length))
+  local percentage=$progress
+  printf "\r\033[0;31;32m[$2: %d%%]\033[0m" "$percentage"
 }
 
 # 测试IP地址的延迟和丢包率
 ping_test() {
+  _green "---------------------------------------------------------------------------------------------------------------------\n"
   _green "源码地址: https://github.com/vpsls/multi_ping\n"
-  _green "启动 ping ...\n"
+  _green "---------------------------------------------------------------------------------------------------------------------\n"
 
   # 每个ip的测试次数
   ip_test_count=$1
@@ -212,16 +212,13 @@ ping_test() {
       sub_pids+=($!)
       ((completed_addresses++))
       progress=$((completed_addresses * 100 / total_addresses))
-      show_progress $progress
+      show_progress $progress "启动ping"
       sleep 0.2
   done
 
-  #printf "\r\033[Kping启动完成, 等待结果统计..."
   echo
-  _green "ping 启动完成, 等待结果统计 ...\n"
 
   while true; do
-    #num_children=$(pgrep -P $main_pid | xargs ps -o comm= -p | grep -v sleep | wc -l)
     num_children=0
     for pid in "${sub_pids[@]}"; do
         if kill -0 $pid 2>/dev/null; then
@@ -230,7 +227,7 @@ ping_test() {
     done
     num_finish=$((total_addresses-num_children))
     progress=$((num_finish * 100 / total_addresses))
-    show_progress $progress
+    show_progress $progress "等待ping"
     if [ $num_children -eq 0 ]; then
         break
     fi
@@ -264,11 +261,13 @@ show_ping_result() {
   final_results+=("${timeout_results[@]}")
 
   # 输出结果
+  _green "---------------------------------------------------------------------------------------------------------------------\n"
   echo
-  echo "厂商                 数据中心                        IP地址                平均延迟(ms)     平均丢包率(%)"
-  echo "----------------------------------------------------------------------------------------------------"
+  echo "---------------------------------------------------------------------------------------------------------------------"
+  echo "厂商                    数据中心                          IP地址                  平均延迟(ms)          平均丢包率(%)"
+  echo "---------------------------------------------------------------------------------------------------------------------"
   for result in "${final_results[@]}"; do
-      str=$(echo "$result" | awk -F "|" '{printf "%-20s %-30s %-20s %-15s %-15s\n", $1, $2, $3, $4, $5}')
+      str=$(echo "$result" | awk -F "|" '{printf "%-23s %-33s %-23s %-21s %-18s\n", $1, $2, $3, $4, $5}')
 
       if [[ $str == *"超时"* ]]; then
           _red "$str\n"
