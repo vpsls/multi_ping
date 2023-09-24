@@ -168,10 +168,6 @@ show_progress() {
 
 # 测试IP地址的延迟和丢包率
 ping_test() {
-  _green "---------------------------------------------------------------------------------------------------------------------\n"
-  _green "源码地址: https://github.com/vpsls/multi_ping\n"
-  _green "---------------------------------------------------------------------------------------------------------------------\n"
-
   # 每个ip的测试次数
   ip_test_count=$1
   # 每次ping的测试次数
@@ -288,6 +284,31 @@ show_ping_result() {
 }
 
 main() {
+  product_names=()
+  for address in "${addresses[@]}"; do
+    product_name=$(echo "$address" | cut -d "|" -f 1)
+    product_names+=("$product_name")
+  done
+  # 去重产品名称
+  product_names=($(echo "${product_names[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+  # 打印去重后的产品名称
+  info=""
+  for name in "${product_names[@]}"; do
+    info+="$name "
+  done
+
+
+  _green "---------------------------------------------------------------------------------------------------------------------\n"
+  _green "                                    源码地址: https://github.com/vpsls/multi_ping\n"
+  _green "使用方法:\n"
+  _green "  测试全部vps: curl -sSL https://ping.vpsls.com | bash\n"
+  _green "  测试指定vps: curl -sSL https://ping.vpsls.com | bash -s [vps_name1] [vps_name2]\n"
+  _green "  可选vps: ${info}\n"
+  _green "测试机房ip:\n"
+  _green "  均为对应vps官网提供的测试机房ip\n"
+  _green "  定期更新最新的ip地址\n"
+  _green "---------------------------------------------------------------------------------------------------------------------\n"
+
   ping_test 3 10 # ping_test 每个ip测试次数 每次测试ping的次数
   show_ping_result
 }
