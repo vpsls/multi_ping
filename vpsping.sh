@@ -309,6 +309,10 @@ main() {
   _green "  定期更新最新的ip地址\n"
   _green "---------------------------------------------------------------------------------------------------------------------\n"
 
+  if [ ${#check_addresses[@]} -eq 0 ]; then
+    _red "未指定有效vps\n"
+    exit 0
+  fi
   ping_test 3 10 # ping_test 每个ip测试次数 每次测试ping的次数
   show_ping_result
 }
