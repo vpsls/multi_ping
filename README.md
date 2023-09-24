@@ -14,10 +14,18 @@ chmod 700 vpsping.sh
 or
 
 ```sh
-curl -sSL https://github.com/vpsls/multi_ping/raw/main/vpsping.sh | bash
-curl -sSL https://github.com/vpsls/multi_ping/raw/main/vpsping.sh | bash -s product_1 product_2 ...
+curl -sSL https://ping.vpsls.com | bash
+curl -sSL https://ping.vpsls.com | bash -s product_1 product_2 ...
 ```
 
-Here is an example of the program's output:
+Here are two examples:
+
+`./vpsping.sh`
 
 ![example](./images/example.png)
+
+
+
+`./vpsping.sh racknerd buyvm`
+
+![example](./images/example2.png)
